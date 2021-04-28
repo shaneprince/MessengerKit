@@ -9,20 +9,20 @@
 import UIKit
 
 open class MSGTailCollectionViewCell: MSGMessageCell {
-    
+
     @IBOutlet public weak var bubble: MSGTailOutgoingBubble!
-    
+
     @IBOutlet weak var bubbleWidthConstraint: NSLayoutConstraint!
-    
+
     override open var message: MSGMessage? {
         didSet {
             guard let message = message,
                 case let MSGMessageBody.text(body) = message.body else { return }
-            
+
             bubble.text = body
         }
     }
-    
+
     override open var style: MSGMessengerStyle? {
         didSet {
             guard let message = message, let style = style as? MSGIMessageStyle else { return }
@@ -36,7 +36,7 @@ open class MSGTailCollectionViewCell: MSGMessageCell {
             bubble.textColor = message.user.isSender ? style.outgoingTextColor : style.incomingTextColor
         }
     }
-    
+
     override open var isLastInSection: Bool {
         didSet {
             guard let style = style as? MSGIMessageStyle,
@@ -44,37 +44,46 @@ open class MSGTailCollectionViewCell: MSGMessageCell {
                 bubble.shouldShowTail = true
                 return
             }
-            
+
             bubble.shouldShowTail = isLastInSection
         }
     }
-    
+
     override open func layoutSubviews() {
         super.layoutSubviews()
         let bubbleSize = bubble.calculatedSize(in: bounds.size)
         bubbleWidthConstraint.constant = bubbleSize.width
     }
-    
+
     open override func prepareForReuse() {
         super.prepareForReuse()
         isLastInSection = false
     }
-    
+
     override open func awakeFromNib() {
         super.awakeFromNib()
-        
+
         bubble.delegate = self
     }
 
 }
 
 extension MSGTailCollectionViewCell: UITextViewDelegate {
-    
+
+    @available(iOS 10.0, *)
     public func textView(_ textView: UITextView, shouldInteractWith URL: URL, in characterRange: NSRange, interaction: UITextItemInteraction) -> Bool {
-        
+
         delegate?.cellLinkTapped(url: URL)
-        
+
         return false
     }
-    
+
+    @available(iOS 9.0, *)
+    public func textView(_ textView: UITextView, shouldInteractWith URL: URL, in:NSRange) -> Bool {
+
+        delegate!.cellLinkTapped(url: URL)
+
+        return false
+    }
+
 }
